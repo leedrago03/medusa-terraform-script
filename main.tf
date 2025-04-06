@@ -17,7 +17,7 @@ locals {
     private_subnet_ids = var.vpc_create ? module.vpc[0].private_subnet_ids : var.private_subnet_ids
   }
   backend = {
-    ecr_arn = var.ecr_backend_create ? module.ecr_backend[0].arn : var.backend_ecr_arn
+    ecr_arn = var.backend_ecr_arn
     url     = var.backend_create ? module.backend[0].url : var.backend_url
   }
 }
@@ -49,10 +49,10 @@ module "elasticache" {
   context = local.context
   vpc     = local.vpc
 
-  node_type            = var.elasticache_node_type
-  nodes_num            = var.elasticache_nodes_num
+  node_type              = var.elasticache_node_type
+  nodes_num              = var.elasticache_nodes_num
   redis_engine_version = var.elasticache_redis_engine_version
-  port                 = var.elasticache_port
+  port                   = var.elasticache_port
 }
 
 module "rds" {
@@ -76,11 +76,11 @@ module "backend" {
   context = local.context
   vpc     = local.vpc
 
-  container_port                   = var.backend_container_port
+  container_port                 = var.backend_container_port
   target_group_health_check_config = var.backend_target_group_health_check_config
-  expose_admin_only                = var.backend_expose_admin_only
+  expose_admin_only              = var.backend_expose_admin_only
 
-  ecr_arn                        = local.backend.ecr_arn
+  ecr_arn                      = var.ecr_backend_create ? module.ecr_backend[0].arn : var.backend_ecr_arn
   container_registry_credentials = var.backend_container_registry_credentials
   container_image                = var.backend_container_image
   resources                      = var.backend_resources
@@ -89,10 +89,10 @@ module "backend" {
   redis_url    = var.elasticache_create ? module.elasticache[0].url : var.redis_url
   database_url = var.rds_create ? module.rds[0].url : var.database_url
 
-  jwt_secret    = var.backend_jwt_secret
-  cookie_secret = var.backend_cookie_secret
-  store_cors    = var.backend_store_cors
-  admin_cors    = var.backend_admin_cors
+  jwt_secret      = var.backend_jwt_secret
+  cookie_secret   = var.backend_cookie_secret
+  store_cors      = var.backend_store_cors
+  admin_cors      = var.backend_admin_cors
 
   run_migrations     = var.backend_run_migrations
   seed_create        = var.backend_seed_create
