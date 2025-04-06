@@ -94,19 +94,14 @@ resource "aws_ecs_cluster" "main" {
 }
 
 resource "aws_ecs_task_definition" "main" {
-  family                   = local.prefix
-  execution_role_arn       = aws_iam_role.ecs_execution.arn
-  task_role_arn            = aws_iam_role.ecs_task.arn
-  network_mode             = "awsvpc"
+  family                      = local.prefix
+  execution_role_arn          = aws_iam_role.ecs_execution.arn
+  task_role_arn               = aws_iam_role.ecs_task.arn
+  network_mode                = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = var.resources.cpu
-  memory                   = var.resources.memory
-  container_definitions    = jsonencode([local.container_definition])
-
-  depends_on = [
-    aws_iam_role_policy_attachment.ecs_execution,
-    aws_iam_role_policy_attachment.ecs_task
-  ]
+  cpu                         = var.resources.cpu
+  memory                      = var.resources.memory
+  container_definitions       = jsonencode([local.container_definition])
 
   tags = local.tags
 }
