@@ -18,11 +18,6 @@ variable "environment" {
     condition     = can(regex("^[a-z0-9-]+$", var.environment))
     error_message = "Environment name must contain only lowercase letters, numbers, and hyphens."
   }
-
-  validation {
-    condition     = length(format("%s%s", var.project, var.environment)) <= 10
-    error_message = "The combined length of project and environment names (including hyphen) must not exceed 10 characters."
-  }
 }
 
 variable "owner" {
@@ -86,7 +81,7 @@ variable "vpc_id" {
   default     = null
 
   validation {
-    condition     = var.vpc_create == true || (var.vpc_create != true && var.vpc_id != null)
+    condition     = var.vpc_id != null
     error_message = "VPC ID is required when vpc_create is set to false."
   }
 }
@@ -97,7 +92,7 @@ variable "public_subnet_ids" {
   default     = null
 
   validation {
-    condition     = var.vpc_create == true || (var.vpc_create != true && var.public_subnet_ids != null)
+    condition     = var.public_subnet_ids != null
     error_message = "Public subnet IDs are required when vpc_create is set to false."
   }
 }
@@ -108,7 +103,7 @@ variable "private_subnet_ids" {
   default     = null
 
   validation {
-    condition     = var.vpc_create == true || (var.vpc_create != true && var.private_subnet_ids != null)
+    condition     = var.private_subnet_ids != null
     error_message = "Private subnet IDs are required when vpc_create is set to false."
   }
 }
@@ -155,7 +150,7 @@ variable "redis_url" {
   sensitive   = true
 
   validation {
-    condition     = var.elasticache_create == true || (var.elasticache_create != true && var.redis_url != null)
+    condition     = var.redis_url != null
     error_message = "Redis connection URL is required when elasticache_create is set to false."
   }
 }
@@ -209,7 +204,7 @@ variable "database_url" {
   sensitive   = true
 
   validation {
-    condition     = var.rds_create == true || (var.rds_create != true && var.database_url != null)
+    condition     = var.database_url != null
     error_message = "Database connection URL is required when rds_create is set to false."
   }
 }
@@ -268,7 +263,7 @@ variable "backend_ecr_arn" {
   default     = null
 
   validation {
-    condition     = var.backend_ecr_arn != true || var.ecr_backend_create != true
+    condition     = var.backend_ecr_arn == null
     error_message = "Only one of backend_ecr_arn or ecr_backend_create can be enabled."
   }
 }
@@ -282,12 +277,7 @@ variable "backend_container_registry_credentials" {
   default = null
 
   validation {
-    condition     = var.backend_container_registry_credentials != true || var.ecr_backend_create != true
-    error_message = "Only one of backend_container_registry_credentials or ecr_backend_create can be enabled."
-  }
-
-  validation {
-    condition     = var.backend_container_registry_credentials != true || var.backend_ecr_arn != true
+    condition     = var.backend_container_registry_credentials == null
     error_message = "Only one of backend_container_registry_credentials or backend_ecr_arn can be enabled."
   }
 }
@@ -400,19 +390,18 @@ variable "backend_admin_credentials" {
 
   validation {
     condition = (
-      var.backend_create != true ||
-      (var.backend_admin_credentials != null ? var.backend_admin_credentials.email != null : true)
+      var.backend_admin_credentials != null ? var.backend_admin_credentials.email != null : true
     )
-    error_message = "Admin email is required when backend_create is true and admin credentials are provided"
+    error_message = "Admin email is required when admin credentials are provided."
   }
 
   validation {
     condition = (
-      var.backend_create != true ||
-      (var.backend_admin_credentials != null ? var.backend_admin_credentials.generate_password == true : true) ||
-      (var.backend_admin_credentials != null ? var.backend_admin_credentials.password != null : true)
+      var.backend_admin_credentials != null ? var.backend_admin_credentials.generate_password == true : true
+    ) || (
+      var.backend_admin_credentials != null ? var.backend_admin_credentials.password != null : true
     )
-    error_message = "Admin password is required when backend_create is true, admin credentials are provided and generate_password is false"
+    error_message = "Admin password is required when admin credentials are provided and generate_password is false."
   }
 }
 
@@ -445,7 +434,7 @@ variable "backend_url" {
   default     = null
 
   validation {
-    condition     = var.backend_create == true || (var.backend_create != true && var.backend_url != null)
+    condition     = var.backend_url != null
     error_message = "Backend URL is required when backend_create is set to false."
   }
 }
@@ -498,7 +487,7 @@ variable "storefront_ecr_arn" {
   default     = null
 
   validation {
-    condition     = var.storefront_container_registry_credentials == null || var.storefront_ecr_arn == null
+    condition     = var.storefront_ecr_arn == null
     error_message = "Only one of storefront_ecr_arn or storefront_container_registry_credentials can be specified."
   }
 }
@@ -566,4 +555,3 @@ variable "storefront_extra_secrets" {
   }))
   default = {}
 }
-
