@@ -19,28 +19,20 @@ data "aws_iam_policy_document" "ecs_execution_assume_role" {
 }
 
 data "aws_iam_policy_document" "ecs_execution_policy" {
-  dynamic "statement" {
-    for_each = var.ecr_arn != null ? [1] : []
-
-    content {
-      actions = [
-        "ecr:GetDownloadUrlForLayer",
-        "ecr:BatchGetImage",
-        "ecr:BatchCheckLayerAvailability",
-      ]
-      resources = [var.ecr_arn]
-      effect    = "Allow"
-    }
+  statement {
+    actions = [
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+      "ecr:BatchCheckLayerAvailability",
+    ]
+    resources = [var.ecr_arn]
+    effect    = "Allow"
   }
 
-  dynamic "statement" {
-    for_each = var.ecr_arn != null ? [1] : []
-
-    content {
-      actions   = ["ecr:GetAuthorizationToken"]
-      resources = ["*"]
-      effect    = "Allow"
-    }
+  statement {
+    actions   = ["ecr:GetAuthorizationToken"]
+    resources = ["*"]
+    effect    = "Allow"
   }
 
   statement {
@@ -57,11 +49,8 @@ data "aws_iam_policy_document" "ecs_execution_policy" {
 
   dynamic "statement" {
     for_each = length(local.container_secret_arns) > 0 ? [1] : []
-
     content {
-      actions = [
-        "secretsmanager:GetSecretValue"
-      ]
+      actions   = ["secretsmanager:GetSecretValue"]
       resources = local.container_secret_arns
       effect    = "Allow"
     }
@@ -69,17 +58,15 @@ data "aws_iam_policy_document" "ecs_execution_policy" {
 }
 
 resource "aws_iam_role" "ecs_execution" {
-  name_prefix        = "${local.prefix}-ecs-execution-"
+  name_prefix          = "${local.prefix}-ecs-execution-"
   assume_role_policy = data.aws_iam_policy_document.ecs_execution_assume_role.json
-
-  tags = local.tags
+  tags                 = local.tags
 }
 
 resource "aws_iam_policy" "ecs_execution" {
   name_prefix = "${local.prefix}-ecs-execution-"
   policy      = data.aws_iam_policy_document.ecs_execution_policy.json
-
-  tags = local.tags
+  tags        = local.tags
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_execution" {
@@ -100,12 +87,7 @@ data "aws_iam_policy_document" "ecs_task_assume_role" {
 
 data "aws_iam_policy_document" "ecs_task_policy" {
   statement {
-    actions = [
-      "ssmmessages:CreateControlChannel",
-      "ssmmessages:CreateDataChannel",
-      "ssmmessages:OpenControlChannel",
-      "ssmmessages:OpenDataChannel"
-    ]
+    actions   = ["ssmmessages:CreateControlChannel", "ssmmessages:CreateDataChannel", "ssmmessages:OpenControlChannel", "ssmmessages:OpenDataChannel"]
     resources = ["*"]
     effect    = "Allow"
   }
@@ -114,8 +96,7 @@ data "aws_iam_policy_document" "ecs_task_policy" {
 resource "aws_iam_policy" "ecs_task" {
   name_prefix = "${local.prefix}-ecs-task-"
   policy      = data.aws_iam_policy_document.ecs_task_policy.json
-
-  tags = local.tags
+  tags        = local.tags
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task" {
@@ -149,10 +130,9 @@ resource "aws_iam_role_policy_attachment" "ecs_task_s3_access" {
 }
 
 resource "aws_iam_role" "ecs_task" {
-  name_prefix        = "${local.prefix}-ecs-task-"
+  name_prefix          = "${local.prefix}-ecs-task-"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_assume_role.json
-
-  tags = local.tags
+  tags                 = local.tags
 }
 
 resource "aws_iam_user_policy_attachment" "s3_access" {
@@ -171,7 +151,6 @@ resource "aws_iam_access_key" "medusa_s3" {
 
 data "aws_iam_policy_document" "lambda_seed_assume_role" {
   count = var.seed_create ? 1 : 0
-
   statement {
     actions = ["sts:AssumeRole"]
     principals {
@@ -184,12 +163,8 @@ data "aws_iam_policy_document" "lambda_seed_assume_role" {
 
 data "aws_iam_policy_document" "lambda_seed_policy" {
   count = var.seed_create ? 1 : 0
-
   statement {
-    actions = [
-      "ecs:ListTasks",
-      "ecs:ExecuteCommand"
-    ]
+    actions = ["ecs:ListTasks", "ecs:ExecuteCommand"]
     resources = ["*"]
     condition {
       test     = "ArnEquals"
@@ -198,46 +173,29 @@ data "aws_iam_policy_document" "lambda_seed_policy" {
     }
     effect = "Allow"
   }
-
   statement {
     actions   = ["ssm:GetCommandInvocation"]
     resources = ["arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"]
     effect    = "Allow"
   }
-
- # statement {
-    actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents"
-    ]
-    resources = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.lambda_seed_function_name}:*"]
-    effect    = "Allow"
-  
 }
 
 resource "aws_iam_role" "lambda_seed" {
-  count = var.seed_create ? 1 : 0
-
-  name_prefix        = "${local.prefix}-lambda-seed-"
+  count                = var.seed_create ? 1 : 0
+  name_prefix          = "${local.prefix}-lambda-seed-"
   assume_role_policy = data.aws_iam_policy_document.lambda_seed_assume_role[0].json
-
-  tags = local.tags
+  tags                 = local.tags
 }
 
 resource "aws_iam_policy" "lambda_seed" {
-  count = var.seed_create ? 1 : 0
-
+  count       = var.seed_create ? 1 : 0
   name_prefix = "${local.prefix}-lambda-seed-"
   policy      = data.aws_iam_policy_document.lambda_seed_policy[0].json
-
-  tags = local.tags
+  tags        = local.tags
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_seed" {
-  count = var.seed_create ? 1 : 0
-
-  role       = aws_iam_role.lambda_seed[0].name
+  count       = var.seed_create ? 1 : 0
+  role        = aws_iam_role.lambda_seed[0].name
   policy_arn = aws_iam_policy.lambda_seed[0].arn
 }
-
