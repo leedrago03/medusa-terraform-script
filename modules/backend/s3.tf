@@ -1,21 +1,21 @@
 resource "aws_s3_bucket" "uploads" {
-  bucket_prefix = "${local.prefix}-uploads-"
-
-  tags = local.tags
+  bucket_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-uploads-" # Modified prefix
+  acl           = "private"
+  tags          = local.tags
 }
 
 resource "aws_s3_bucket_public_access_block" "uploads" {
   bucket = aws_s3_bucket.uploads.id
 
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
+  block_public_acls          = false
+  block_public_policy          = false
+  ignore_public_acls         = false
   restrict_public_buckets = false
 }
 
 data "aws_iam_policy_document" "allow_public_read" {
   statement {
-    sid    = "PublicRead"
+    sid     = "PublicRead"
     effect = "Allow"
     principals {
       type        = "*"
