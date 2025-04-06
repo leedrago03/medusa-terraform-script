@@ -10,8 +10,8 @@ variable "context" {
 
 variable "vpc" {
   type = object({
-    id                 = string
-    public_subnet_ids  = list(string)
+    id                = string
+    public_subnet_ids = list(string)
     private_subnet_ids = list(string)
   })
   description = "VPC configuration object containing VPC ID and subnet IDs"
@@ -31,16 +31,14 @@ variable "load_balancer_type" {
 variable "target_group_health_check_config" {
   description = "Health check configuration for load balancer target group pointing on backend containers"
   type = object({
-    interval            = number
-    matcher             = number
-    timeout             = number
-    path                = string
-    healthy_threshold   = number
+    interval          = number
+    matcher           = number
+    timeout           = number
+    path              = string
+    healthy_threshold = number
     unhealthy_threshold = number
   })
 }
-
-
 
 variable "expose_admin_only" {
   description = "Whether to expose only /admin paths"
@@ -160,18 +158,12 @@ variable "admin_credentials" {
   sensitive = true
 
   validation {
-    condition = (
-      var.admin_credentials != null ? var.admin_credentials.email != "" : true
-    )
+    condition     = var.admin_credentials != null ? var.admin_credentials.email != "" : true
     error_message = "Admin email is required when admin credentials are provided."
   }
 
   validation {
-    condition = (
-      var.admin_credentials != null ? var.admin_credentials.generate_password == true : true
-    ) || (
-      var.admin_credentials != null ? var.admin_credentials.password != "" : true
-    )
+    condition     = (var.admin_credentials != null ? var.admin_credentials.generate_password == true : true) || (var.admin_credentials != null ? var.admin_credentials.password != "" : true)
     error_message = "Admin password is required when admin credentials are provided and generate_password is false."
   }
 }
@@ -193,7 +185,6 @@ variable "extra_secrets" {
     key = string
   }))
 }
-
 
 variable "deployment_circuit_breaker" {
   description = "Deployment circuit breaker configuration"
