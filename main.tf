@@ -18,7 +18,7 @@ locals {
   }
   backend = {
     ecr_arn = var.backend_ecr_arn
-    url     = var.backend_create ? module.backend[0].lb_dns_name : var.backend_url # Corrected line
+    url     = var.backend_create ? module.backend[0].lb_dns_name : var.backend_url # or application_load_balancer_dns_name
   }
 }
 
