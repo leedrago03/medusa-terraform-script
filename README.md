@@ -14,7 +14,3 @@ This module provides a complete set of composable sub-modules for each component
 - **Scalable:** Designed to support both small and large-scale deployments of Medusa.
 
 #
-<!-- END_TF_DOCS -->
-<!-- markdownlint-enable MD033 MD024 -->
----
-:heart: *Technology made with passion by [u11d](https://u11d.com)*
