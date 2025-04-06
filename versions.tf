@@ -1,6 +1,8 @@
 terraform {
   required_version = "~> 1.9"
 
+  experiments = [module_variable_optional_attrs]  # 👈 This line enables optional object attributes
+
   required_providers {
     archive = {
       source  = "hashicorp/archive"
