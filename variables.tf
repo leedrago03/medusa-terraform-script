@@ -78,34 +78,19 @@ variable "az_count" {
 variable "vpc_id" {
   description = "Existing VPC ID. Required if vpc_create is false."
   type        = string
-  default     = null
-
-  validation {
-    condition     = var.vpc_id != null
-    error_message = "VPC ID is required when vpc_create is set to false."
-  }
+  default     = null # Removed validation rule
 }
 
 variable "public_subnet_ids" {
   description = "List of public subnet IDs. Required if vpc_create is false."
   type        = list(string)
-  default     = null
-
-  validation {
-    condition     = var.public_subnet_ids != null
-    error_message = "Public subnet IDs are required when vpc_create is set to false."
-  }
+  default     = null # Removed validation rule
 }
 
 variable "private_subnet_ids" {
   description = "List of private subnet IDs. Required if vpc_create is false."
   type        = list(string)
-  default     = null
-
-  validation {
-    condition     = var.private_subnet_ids != null
-    error_message = "Private subnet IDs are required when vpc_create is set to false."
-  }
+  default     = null # Removed validation rule
 }
 
 # Redis
@@ -146,13 +131,8 @@ variable "elasticache_port" {
 variable "redis_url" {
   description = "Redis connection URL. Required if elasticache_create is false."
   type        = string
-  default     = null
+  default     = null # Removed validation rule
   sensitive   = true
-
-  validation {
-    condition     = var.redis_url != null
-    error_message = "Redis connection URL is required when elasticache_create is set to false."
-  }
 }
 
 # Database
@@ -200,13 +180,8 @@ variable "rds_port" {
 variable "database_url" {
   description = "Database connection URL. Required if rds_create is false."
   type        = string
-  default     = null
+  default     = null # Removed validation rule
   sensitive   = true
-
-  validation {
-    condition     = var.database_url != null
-    error_message = "Database connection URL is required when rds_create is set to false."
-  }
 }
 
 # Backend
@@ -228,19 +203,19 @@ variable "backend_container_port" {
 variable "backend_target_group_health_check_config" {
   description = "Health check configuration for load balancer target group pointing on backend containers"
   type = object({
-    interval            = number
-    matcher             = number
-    timeout             = number
-    path                = string
-    healthy_threshold   = number
+    interval          = number
+    matcher           = number
+    timeout           = number
+    path              = string
+    healthy_threshold = number
     unhealthy_threshold = number
   })
   default = {
-    interval            = 30
-    matcher             = 200
-    timeout             = 3
-    path                = "/health"
-    healthy_threshold   = 3
+    interval          = 30
+    matcher           = 200
+    timeout           = 3
+    path              = "/health"
+    healthy_threshold = 3
     unhealthy_threshold = 3
   }
 }
@@ -393,24 +368,15 @@ variable "backend_admin_credentials" {
   sensitive = true
 
   validation {
-    condition = (
-      var.backend_admin_credentials != null ? var.backend_admin_credentials.email != "" : true
-    )
+    condition     = var.backend_admin_credentials != null ? var.backend_admin_credentials.email != "" : true
     error_message = "Admin email is required when admin credentials are provided."
   }
 
   validation {
-    condition = (
-      var.backend_admin_credentials != null ? var.backend_admin_credentials.generate_password == true : true
-    ) || (
-      var.backend_admin_credentials != null ? var.backend_admin_credentials.password != "" : true
-    )
+    condition     = (var.backend_admin_credentials != null ? var.backend_admin_credentials.generate_password == true : true) || (var.backend_admin_credentials != null ? var.backend_admin_credentials.password != "" : true)
     error_message = "Admin password is required when admin credentials are provided and generate_password is false."
   }
 }
-
-
-
 
 variable "backend_extra_security_group_ids" {
   description = "List of additional security group IDs to associate with the backend ECS service"
@@ -438,12 +404,7 @@ variable "backend_extra_secrets" {
 variable "backend_url" {
   description = "Medusa backend URL. Required if backend_create is false."
   type        = string
-  default     = null
-
-  validation {
-    condition     = var.backend_url != null
-    error_message = "Backend URL is required when backend_create is set to false."
-  }
+  default     = null # Remove Validation rule
 }
 
 # Storefront
@@ -465,19 +426,19 @@ variable "storefront_container_port" {
 variable "storefront_target_group_health_check_config" {
   description = "Health check configuration for load balancer target group pointing on storefront containers"
   type = object({
-    interval            = number
-    matcher             = number
-    timeout             = number
-    path                = string
-    healthy_threshold   = number
+    interval          = number
+    matcher           = number
+    timeout           = number
+    path              = string
+    healthy_threshold = number
     unhealthy_threshold = number
   })
   default = {
-    interval            = 30
-    matcher             = 200
-    timeout             = 3
-    path                = "/api"
-    healthy_threshold   = 3
+    interval          = 30
+    matcher           = 200
+    timeout           = 3
+    path              = "/api"
+    healthy_threshold = 3
     unhealthy_threshold = 3
   }
 }
@@ -562,4 +523,3 @@ variable "storefront_extra_secrets" {
   }))
   default = {}
 }
-
