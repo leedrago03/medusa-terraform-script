@@ -386,7 +386,8 @@ variable "admin_credentials" {
     generate_password = optional(bool)
   })
   default = {
-    email = ""
+    email             = ""
+    generate_password = true
   }
   sensitive = true
 
@@ -406,6 +407,7 @@ variable "admin_credentials" {
     error_message = "Admin password is required when admin credentials are provided and generate_password is false."
   }
 }
+
 
 
 variable "backend_extra_security_group_ids" {
