@@ -40,7 +40,7 @@ resource "aws_cloudfront_function" "block_access" {
   EOT
 }
 
-resource "aws_cloudfront_distribution" "main" {
+/*resource "aws_cloudfront_distribution" "main" {
   enabled = true
   comment = title(local.prefix)
 
@@ -54,7 +54,7 @@ resource "aws_cloudfront_distribution" "main" {
       vpc_origin_id = aws_cloudfront_vpc_origin.main.id
     }
   }
-
+*/
   price_class = var.cloudfront_price_class
 
   restrictions {
