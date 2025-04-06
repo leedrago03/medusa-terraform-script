@@ -245,11 +245,11 @@ variable "backend_target_group_health_check_config" {
   }
 }
 
-variable "backend_cloudfront_price_class" {
+/*variable "backend_cloudfront_price_class" {
   description = "The price class for the backend CloudFront distribution"
   type        = string
   default     = "PriceClass_100"
-}
+}*/
 
 variable "backend_expose_admin_only" {
   description = "Whether to expose publicly only /admin paths in the backend"
@@ -482,11 +482,11 @@ variable "storefront_target_group_health_check_config" {
   }
 }
 
-variable "storefront_cloudfront_price_class" {
+/*variable "storefront_cloudfront_price_class" {
   description = "The price class for the CloudFront distribution"
   type        = string
   default     = "PriceClass_100"
-}
+}*/
 
 variable "storefront_ecr_arn" {
   description = "ARN of Elastic Container Registry. Cannot be used together with storefront_container_registry_credentials."
