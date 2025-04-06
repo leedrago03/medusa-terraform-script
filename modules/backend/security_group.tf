@@ -29,7 +29,7 @@ resource "aws_vpc_security_group_ingress_rule" "lb" {
   tags = local.tags
 }
 
-resource "aws_vpc_security_group_ingress_rule" "vpc_origin" {
+/*resource "aws_vpc_security_group_ingress_rule" "vpc_origin" {
   security_group_id = aws_security_group.lb.id
 
   prefix_list_id = data.aws_ec2_managed_prefix_list.vpc_origin.id
@@ -38,7 +38,7 @@ resource "aws_vpc_security_group_ingress_rule" "vpc_origin" {
   ip_protocol    = "tcp"
 
   tags = local.tags
-}
+}*/
 
 resource "aws_vpc_security_group_egress_rule" "lb" {
   security_group_id = aws_security_group.lb.id
