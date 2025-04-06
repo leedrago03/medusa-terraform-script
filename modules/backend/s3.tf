@@ -1,7 +1,11 @@
 resource "aws_s3_bucket" "uploads" {
-  bucket_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-uploads-" # Modified prefix
-  acl           = "private"
+  bucket_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-uploads-"
   tags          = local.tags
+}
+
+resource "aws_s3_bucket_acl" "uploads" {
+  bucket = aws_s3_bucket.uploads.id
+  acl    = "private"
 }
 
 resource "aws_s3_bucket_public_access_block" "uploads" {
