@@ -50,6 +50,7 @@ variable "expose_admin_only" {
 variable "ecr_arn" {
   description = "ARN of Elastic Container Registry."
   type        = string
+  default     = "*" # Add default value
 }
 
 variable "container_registry_credentials" {
