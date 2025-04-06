@@ -563,5 +563,11 @@ variable "storefront_extra_secrets" {
     arn = string
     key = string
   }))
+
   default = {}
+}
+variable "backend_hostname" {
+  description = "The hostname used for the backend service (e.g., api.example.com)"
+  type        = string
+  default     = ""
 }
