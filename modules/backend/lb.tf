@@ -2,16 +2,16 @@ resource "aws_lb" "main" {
   load_balancer_type = var.load_balancer_type
   subnets            = var.vpc.private_subnet_ids
   security_groups    = [aws_security_group.lb.id]
-  name               = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-backend-lb" # Corrected name
+  name               = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-backend-lb"
   tags               = local.tags
 }
 
 resource "aws_lb_target_group" "main" {
-  port        = var.container_port
-  protocol    = var.load_balancer_type == "network" ? "TCP" : "HTTP"
-  vpc_id      = var.vpc.id
+  port       = var.container_port
+  protocol   = var.load_balancer_type == "network" ? "TCP" : "HTTP"
+  vpc_id     = var.vpc.id
   target_type = "ip"
-  name        = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-backend-tg" # Corrected name
+  name       = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-backend-tg"
   health_check {
     protocol            = "HTTP"
     port                = var.container_port
@@ -32,10 +32,8 @@ resource "aws_lb_listener" "main" {
 
   default_action {
     target_group_arn = aws_lb_target_group.main.arn
-    type              = "forward"
+    type             = "forward"
   }
-
-  depends_on = [aws_lb_target_group.main]
 
   tags = local.tags
 }
