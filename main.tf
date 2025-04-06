@@ -1,3 +1,4 @@
+
 data "aws_partition" "current" {}
 data "aws_caller_identity" "current" {}
 data "aws_iam_session_context" "current" {
@@ -18,7 +19,7 @@ locals {
   }
   backend = {
     ecr_arn = var.backend_ecr_arn
-    url     = var.backend_create ? module.backend[0].lb_dns_name : var.backend_url # or application_load_balancer_dns_name
+    url     = var.backend_create ? module.backend[0].application_load_balancer_dns_name : var.backend_url  # CORRECTED LINE
   }
 }
 
@@ -76,13 +77,13 @@ module "backend" {
   context = local.context
   vpc     = local.vpc
 
-  container_port                 = var.backend_container_port
+  container_port                       = var.backend_container_port
   target_group_health_check_config = var.backend_target_group_health_check_config
-  expose_admin_only              = var.backend_expose_admin_only
+  expose_admin_only                  = var.backend_expose_admin_only
 
-  ecr_arn                      = var.ecr_backend_create ? module.ecr_backend[0].arn : var.backend_ecr_arn
+  ecr_arn                        = var.ecr_backend_create ? module.ecr_backend[0].arn : var.backend_ecr_arn
   container_registry_credentials = var.backend_container_registry_credentials
-  container_image                = var.backend_container_image
+  container_image                  = var.backend_container_image
   resources                      = var.backend_resources
   logs                           = var.backend_logs
 
@@ -94,13 +95,13 @@ module "backend" {
   store_cors      = var.backend_store_cors
   admin_cors      = var.backend_admin_cors
 
-  run_migrations     = var.backend_run_migrations
-  seed_create        = var.backend_seed_create
-  seed_run           = var.backend_seed_run
-  seed_command       = var.backend_seed_command
-  seed_timeout       = var.backend_seed_timeout
+  run_migrations        = var.backend_run_migrations
+  seed_create           = var.backend_seed_create
+  seed_run              = var.backend_seed_run
+  seed_command          = var.backend_seed_command
+  seed_timeout          = var.backend_seed_timeout
   seed_fail_on_error = var.backend_seed_fail_on_error
-  admin_credentials  = var.backend_admin_credentials
+  admin_credentials   = var.backend_admin_credentials
 
   extra_security_group_ids = concat(
     var.rds_create ? [module.rds[0].client_security_group_id] : [],
