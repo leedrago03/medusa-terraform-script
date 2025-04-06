@@ -205,7 +205,7 @@ data "aws_iam_policy_document" "lambda_seed_policy" {
     effect    = "Allow"
   }
 
-/*  statement {
+ # statement {
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
@@ -213,8 +213,8 @@ data "aws_iam_policy_document" "lambda_seed_policy" {
     ]
     resources = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.lambda_seed_function_name}:*"]
     effect    = "Allow"
-  }
-}*/
+  
+}
 
 resource "aws_iam_role" "lambda_seed" {
   count = var.seed_create ? 1 : 0
