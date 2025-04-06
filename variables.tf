@@ -560,6 +560,6 @@ variable "storefront_extra_secrets" {
     arn = string
     key = string
   }))
-
   default = {}
+}
 
