@@ -46,13 +46,13 @@ data "aws_iam_policy_document" "ecs_execution_policy" {
 }
 
 resource "aws_iam_role" "ecs_execution" {
-  name_prefix          = "${local.prefix}-ecs-execution-"
+  name_prefix          = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-ecs-exec-" # Modified prefix
   assume_role_policy = data.aws_iam_policy_document.ecs_execution_assume_role.json
   tags                 = local.tags
 }
 
 resource "aws_iam_policy" "ecs_execution" {
-  name_prefix = "${local.prefix}-ecs-execution-"
+  name_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-ecs-exec-" # Modified prefix
   policy      = data.aws_iam_policy_document.ecs_execution_policy.json
   tags        = local.tags
 }
@@ -82,7 +82,7 @@ data "aws_iam_policy_document" "ecs_task_policy" {
 }
 
 resource "aws_iam_policy" "ecs_task" {
-  name_prefix = "${local.prefix}-ecs-task-"
+  name_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-ecs-task-" # Modified prefix
   policy      = data.aws_iam_policy_document.ecs_task_policy.json
   tags        = local.tags
 }
@@ -107,7 +107,7 @@ data "aws_iam_policy_document" "s3_access" {
 }
 
 resource "aws_iam_policy" "s3_access" {
-  name_prefix = "${local.prefix}-s3-access-"
+  name_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-s3-access-" # Modified prefix
   policy      = data.aws_iam_policy_document.s3_access.json
   tags        = local.tags
 }
@@ -118,7 +118,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_s3_access" {
 }
 
 resource "aws_iam_role" "ecs_task" {
-  name_prefix          = "${local.prefix}-ecs-task-"
+  name_prefix          = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-ecs-task-" # Modified prefix
   assume_role_policy = data.aws_iam_policy_document.ecs_task_assume_role.json
   tags                 = local.tags
 }
@@ -129,7 +129,7 @@ resource "aws_iam_user_policy_attachment" "s3_access" {
 }
 
 resource "aws_iam_user" "medusa_s3" {
-  name = "${local.prefix}-s3-user"
+  name = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-s3-user" # Modified prefix
   tags = local.tags
 }
 
@@ -170,14 +170,14 @@ data "aws_iam_policy_document" "lambda_seed_policy" {
 
 resource "aws_iam_role" "lambda_seed" {
   count                = var.seed_create ? 1 : 0
-  name_prefix          = "${local.prefix}-lambda-seed-"
+  name_prefix          = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-lambda-seed-" # Modified prefix
   assume_role_policy = data.aws_iam_policy_document.lambda_seed_assume_role[0].json
   tags                 = local.tags
 }
 
 resource "aws_iam_policy" "lambda_seed" {
   count       = var.seed_create ? 1 : 0
-  name_prefix = "${local.prefix}-lambda-seed-"
+  name_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-lambda-seed-" # Modified prefix
   policy      = data.aws_iam_policy_document.lambda_seed_policy[0].json
   tags        = local.tags
 }
