@@ -1,6 +1,25 @@
+# modules/backend/ecs.tf
 
 locals {
-  # ... (other local variables)
+  container_name = "backend"
+
+  container_default_env = merge(
+    {
+      DATABASE_URL : var.database_url
+    },
+    {
+      S3_FILE_URL : aws_s3_bucket.uploads.bucket_regional_domain_name,
+      S3_BUCKET   : aws_s3_bucket.uploads.id,
+      S3_REGION   : aws_s3_bucket.uploads.region,
+      S3_ENDPOINT   : "https://s3.${aws_s3_bucket.uploads.region}.amazonaws.com"
+    },
+    var.redis_url != null ? { REDIS_URL : var.redis_url, CACHE_REDIS_URL : var.redis_url, EVENTS_REDIS_URL : var.redis_url, WE_REDIS_URL : var.redis_url } : {},
+    var.store_cors != null ? { STORE_CORS : var.store_cors } : {},
+    var.admin_cors != null ? { ADMIN_CORS : var.admin_cors } : {},
+    var.run_migrations != null ? { MEDUSA_RUN_MIGRATION : tostring(var.run_migrations) } : {},
+    local.create_admin_user != null ? { MEDUSA_CREATE_ADMIN_USER : tostring(local.create_admin_user) } : {}
+  )
+  container_env = merge(local.container_default_env, var.extra_environment_variables)
 
   container_default_secrets = merge(
     {
@@ -25,8 +44,6 @@ locals {
     } : {}
   )
   container_secrets = merge(local.container_default_secrets, var.extra_secrets)
-  # ... (other local variables)
-}
 
   container_definition = {
     name           = local.container_name
@@ -80,7 +97,7 @@ resource "aws_ecs_task_definition" "main" {
   requires_compatibilities = ["FARGATE"]
   cpu                       = var.resources.cpu
   memory                    = var.resources.memory
-  container_definitions     = jsonencode([local.container_definition])
+  container_definitions     = jsonencode([local.container_definition]) # Corrected line
 
   tags = local.tags
 }
@@ -114,49 +131,4 @@ resource "aws_ecs_service" "main" {
   wait_for_steady_state = true
 
   tags = local.tags
-}
-
-# modules/backend/secret.tf
-resource "aws_secretsmanager_secret" "jwt_secret" {
-  name_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-jwt-secret-"
-  tags        = local.tags
-}
-
-resource "aws_secretsmanager_secret_version" "jwt_secret" {
-  secret_id     = aws_secretsmanager_secret.jwt_secret.id
-  secret_string = var.jwt_secret
-}
-
-resource "aws_secretsmanager_secret" "cookie_secret" {
-  name_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-cookie-secret-"
-  tags        = local.tags
-}
-
-resource "aws_secretsmanager_secret_version" "cookie_secret" {
-  secret_id     = aws_secretsmanager_secret.cookie_secret.id
-  secret_string = var.cookie_secret
-}
-
-resource "aws_secretsmanager_secret" "admin_secret" {
-  count       = local.create_admin_user ? 1 : 0
-  name_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-admin-secret-"
-  tags        = local.tags
-}
-
-resource "aws_secretsmanager_secret_version" "admin_secret" {
-  count         = local.create_admin_user ? 1 : 0
-  secret_id     = aws_secretsmanager_secret.admin_secret[0].id
-  secret_string = jsonencode(var.admin_credentials)
-}
-
-resource "aws_secretsmanager_secret" "registry_credentials" {
-  count       = var.container_registry_credentials != null ? 1 : 0
-  name_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-registry-credentials-"
-  tags        = local.tags
-}
-
-resource "aws_secretsmanager_secret_version" "registry_credentials" {
-  count         = var.container_registry_credentials != null ? 1 : 0
-  secret_id     = aws_secretsmanager_secret.registry_credentials[0].id
-  secret_string = jsonencode(var.container_registry_credentials)
 }
