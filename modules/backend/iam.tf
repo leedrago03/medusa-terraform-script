@@ -91,3 +91,57 @@ resource "aws_iam_role_policy_attachment" "ecs_task" {
   role       = aws_iam_role.ecs_task.name
   policy_arn = aws_iam_policy.ecs_task.arn
 }
+
+#  Removed s3_access policy and user resources
+
+
+data "aws_iam_policy_document" "lambda_seed_assume_role" {
+  count = var.seed_create ? 1 : 0
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+    effect = "Allow"
+  }
+}
+
+data "aws_iam_policy_document" "lambda_seed_policy" {
+  count = var.seed_create ? 1 : 0
+  statement {
+    actions = ["ecs:ListTasks", "ecs:ExecuteCommand"]
+    resources = ["*"]
+    condition {
+      test    = "ArnEquals"
+      variable = "ecs:cluster"
+      values  = [aws_ecs_cluster.main.arn]
+    }
+    effect = "Allow"
+  }
+  statement {
+    actions   = ["ssm:GetCommandInvocation"]
+    resources = ["arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"]
+    effect    = "Allow"
+  }
+}
+
+resource "aws_iam_role" "lambda_seed" {
+  count             = var.seed_create ? 1 : 0
+  name_prefix       = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-lambda-seed-" # Modified prefix
+  assume_role_policy = data.aws_iam_policy_document.lambda_seed_assume_role[0].json
+  tags              = local.tags
+}
+
+resource "aws_iam_policy" "lambda_seed" {
+  count       = var.seed_create ? 1 : 0
+  name_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-lambda-seed-" # Modified prefix
+  policy      = data.aws_iam_policy_document.lambda_seed_policy[0].json
+  tags        = local.tags
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_seed" {
+  count      = var.seed_create ? 1 : 0
+  role       = aws_iam_role.lambda_seed[0].name
+  policy_arn = aws_iam_policy.lambda_seed[0].arn
+}
