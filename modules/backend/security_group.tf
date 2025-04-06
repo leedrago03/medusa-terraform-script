@@ -3,9 +3,7 @@ locals {
   ecs_sg_name = "${local.prefix}-ecs-"
 }
 
-data "aws_ec2_managed_prefix_list" "vpc_origin" {
-  name = "com.amazonaws.global.cloudfront.origin-facing"
-}
+
 
 resource "aws_security_group" "lb" {
   name_prefix = local.lb_sg_name
