@@ -9,7 +9,6 @@ locals {
       S3_FILE_URL : aws_s3_bucket.uploads.bucket_regional_domain_name,
       S3_BUCKET   : aws_s3_bucket.uploads.id,
       S3_REGION   : aws_s3_bucket.uploads.region,
-      #S3_ACCESS_KEY_ID : aws_iam_access_key.medusa_s3.id, # Removed S3 access key
       S3_ENDPOINT   : "https://s3.${aws_s3_bucket.uploads.region}.amazonaws.com"
     },
     var.redis_url != null ? { REDIS_URL : var.redis_url, CACHE_REDIS_URL : var.redis_url, EVENTS_REDIS_URL : var.redis_url, WE_REDIS_URL : var.redis_url } : {},
@@ -30,10 +29,6 @@ locals {
         arn = aws_secretsmanager_secret.cookie_secret.arn
         key = "::${aws_secretsmanager_secret_version.cookie_secret.version_id}"
       },
-      #S3_SECRET_ACCESS_KEY : {   # Removed S3 secret access key
-      #  arn = aws_secretsmanager_secret.s3_user_secret.arn
-      #  key = "::${aws_secretsmanager_secret_version.s3_user_secret.version_id}"
-      # },
     },
     local.create_admin_user ? {
       MEDUSA_ADMIN_EMAIL : {
@@ -96,7 +91,6 @@ resource "aws_ecs_cluster" "main" {
 resource "aws_ecs_task_definition" "main" {
   family                    = local.prefix
   execution_role_arn        = aws_iam_role.ecs_execution.arn
-  task_role_arn             = aws_iam_role.ecs_task.arn
   network_mode              = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                       = var.resources.cpu
@@ -137,6 +131,47 @@ resource "aws_ecs_service" "main" {
   tags = local.tags
 }
 
+# modules/backend/secret.tf
+resource "aws_secretsmanager_secret" "jwt_secret" {
+  name_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-jwt-secret-"
+  tags        = local.tags
+}
 
-# terraform.tfvars (No changes needed)
-# Root main.tf (No changes needed)
+resource "aws_secretsmanager_secret_version" "jwt_secret" {
+  secret_id     = aws_secretsmanager_secret.jwt_secret.id
+  secret_string = var.jwt_secret
+}
+
+resource "aws_secretsmanager_secret" "cookie_secret" {
+  name_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-cookie-secret-"
+  tags        = local.tags
+}
+
+resource "aws_secretsmanager_secret_version" "cookie_secret" {
+  secret_id     = aws_secretsmanager_secret.cookie_secret.id
+  secret_string = var.cookie_secret
+}
+
+resource "aws_secretsmanager_secret" "admin_secret" {
+  count       = local.create_admin_user ? 1 : 0
+  name_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-admin-secret-"
+  tags        = local.tags
+}
+
+resource "aws_secretsmanager_secret_version" "admin_secret" {
+  count         = local.create_admin_user ? 1 : 0
+  secret_id     = aws_secretsmanager_secret.admin_secret[0].id
+  secret_string = jsonencode(var.admin_credentials)
+}
+
+resource "aws_secretsmanager_secret" "registry_credentials" {
+  count       = var.container_registry_credentials != null ? 1 : 0
+  name_prefix = "${substr(var.context.project, 0, 8)}-${substr(var.context.environment, 0, 8)}-registry-credentials-"
+  tags        = local.tags
+}
+
+resource "aws_secretsmanager_secret_version" "registry_credentials" {
+  count         = var.container_registry_credentials != null ? 1 : 0
+  secret_id     = aws_secretsmanager_secret.registry_credentials[0].id
+  secret_string = jsonencode(var.container_registry_credentials)
+}
