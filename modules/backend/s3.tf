@@ -3,36 +3,13 @@ resource "aws_s3_bucket" "uploads" {
   tags          = local.tags
 }
 
-resource "aws_s3_bucket_acl" "uploads" {
-  bucket = aws_s3_bucket.uploads.id
-  acl    = "private"
-}
-
 resource "aws_s3_bucket_public_access_block" "uploads" {
   bucket = aws_s3_bucket.uploads.id
 
-  block_public_acls          = false
-  block_public_policy          = false
-  ignore_public_acls         = false
-  restrict_public_buckets = false
-}
-
-data "aws_iam_policy_document" "allow_public_read" {
-  statement {
-    sid     = "PublicRead"
-    effect = "Allow"
-    principals {
-      type        = "*"
-      identifiers = ["*"]
-    }
-    actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.uploads.arn}/*"]
-  }
-}
-
-resource "aws_s3_bucket_policy" "allow_public_read" {
-  bucket = aws_s3_bucket.uploads.id
-  policy = data.aws_iam_policy_document.allow_public_read.json
+  block_public_acls   = true
+  block_public_policy = true
+  ignore_public_acls  = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_cors_configuration" "uploads" {
@@ -40,7 +17,7 @@ resource "aws_s3_bucket_cors_configuration" "uploads" {
 
   cors_rule {
     allowed_headers = ["*"]
-    allowed_methods = ["GET", "PUT", "POST", "DELETE"]
+    allowed_methods = ["GET", "PUT", "POST", "DELETE", "HEAD"] # Added HEAD method
     allowed_origins = ["*"]
     expose_headers  = ["ETag", "Content-Length", "Content-Type"]
     max_age_seconds = 3000
