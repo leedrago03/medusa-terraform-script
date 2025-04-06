@@ -35,18 +35,6 @@ data "aws_iam_policy_document" "ecs_execution_policy" {
     effect    = "Allow"
   }
 
-  statement {
-    actions = [
-      "logs:PutLogEvents",
-      "logs:CreateLogStream"
-    ]
-    resources = [
-      aws_cloudwatch_log_group.main.arn,
-      "${aws_cloudwatch_log_group.main.arn}:log-stream:*"
-    ]
-    effect = "Allow"
-  }
-
   dynamic "statement" {
     for_each = length(local.container_secret_arns) > 0 ? [1] : []
     content {
