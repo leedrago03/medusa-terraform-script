@@ -1,4 +1,4 @@
-locals {
+/* locals {
   origin_id = "${local.prefix}-lb"
 }
 
@@ -131,3 +131,4 @@ resource "aws_cloudfront_function" "block_access" {
 
   tags = local.tags
 }
+*/
