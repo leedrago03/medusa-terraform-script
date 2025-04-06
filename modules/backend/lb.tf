@@ -36,9 +36,8 @@ resource "aws_lb_listener" "main" {
     type             = "forward"
   }
 
-  lifecycle {
-    replace_triggered_by = [aws_lb_target_group.main]
-  }
+  depends_on = [aws_lb_target_group.main]
 
   tags = local.tags
 }
+
