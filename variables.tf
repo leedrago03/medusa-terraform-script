@@ -407,6 +407,7 @@ variable "admin_credentials" {
   }
 }
 
+
 variable "backend_extra_security_group_ids" {
   description = "List of additional security group IDs to associate with the backend ECS service"
   type        = list(string)
