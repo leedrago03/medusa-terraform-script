@@ -6,11 +6,11 @@ locals {
       DATABASE_URL : var.database_url
     },
     {
-      S3_FILE_URL : aws_s3_bucket.uploads.bucket_regional_domain_name
-      S3_BUCKET : aws_s3_bucket.uploads.id
-      S3_REGION : aws_s3_bucket.uploads.region
-      S3_ACCESS_KEY_ID : aws_iam_access_key.medusa_s3.id
-      S3_ENDPOINT : "https://s3.${aws_s3_bucket.uploads.region}.amazonaws.com"
+      S3_FILE_URL : aws_s3_bucket.uploads.bucket_regional_domain_name,
+      S3_BUCKET   : aws_s3_bucket.uploads.id,
+      S3_REGION   : aws_s3_bucket.uploads.region,
+      #S3_ACCESS_KEY_ID : aws_iam_access_key.medusa_s3.id, # Removed S3 access key
+      S3_ENDPOINT   : "https://s3.${aws_s3_bucket.uploads.region}.amazonaws.com"
     },
     var.redis_url != null ? { REDIS_URL : var.redis_url, CACHE_REDIS_URL : var.redis_url, EVENTS_REDIS_URL : var.redis_url, WE_REDIS_URL : var.redis_url } : {},
     var.store_cors != null ? { STORE_CORS : var.store_cors } : {},
@@ -29,11 +29,11 @@ locals {
       COOKIE_SECRET : {
         arn = aws_secretsmanager_secret.cookie_secret.arn
         key = "::${aws_secretsmanager_secret_version.cookie_secret.version_id}"
-      }
-      S3_SECRET_ACCESS_KEY : {
-        arn = aws_secretsmanager_secret.s3_user_secret.arn
-        key = "::${aws_secretsmanager_secret_version.s3_user_secret.version_id}"
-      }
+      },
+      #S3_SECRET_ACCESS_KEY : {   # Removed S3 secret access key
+      #  arn = aws_secretsmanager_secret.s3_user_secret.arn
+      #  key = "::${aws_secretsmanager_secret_version.s3_user_secret.version_id}"
+      # },
     },
     local.create_admin_user ? {
       MEDUSA_ADMIN_EMAIL : {
@@ -49,10 +49,10 @@ locals {
   container_secrets = merge(local.container_default_secrets, var.extra_secrets)
 
   container_definition = {
-    name   = local.container_name
-    image  = var.container_image
-    cpu    = var.resources.cpu
-    memory = var.resources.memory
+    name           = local.container_name
+    image          = var.container_image
+    cpu            = var.resources.cpu
+    memory         = var.resources.memory
     portMappings = [
       {
         containerPort = var.container_port
@@ -64,7 +64,7 @@ locals {
       logDriver = "awslogs"
       options = {
         "awslogs-region"        = data.aws_region.current.name,
-        "awslogs-group"         = "${local.prefix}${var.logs.group}"
+        "awslogs-group"         = "${local.prefix}${var.logs.group}",
         "awslogs-stream-prefix" = var.logs.prefix
       }
     }
@@ -94,40 +94,40 @@ resource "aws_ecs_cluster" "main" {
 }
 
 resource "aws_ecs_task_definition" "main" {
-  family                      = local.prefix
-  execution_role_arn          = aws_iam_role.ecs_execution.arn
-  task_role_arn               = aws_iam_role.ecs_task.arn
-  network_mode                = "awsvpc"
+  family                    = local.prefix
+  execution_role_arn        = aws_iam_role.ecs_execution.arn
+  task_role_arn             = aws_iam_role.ecs_task.arn
+  network_mode              = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                         = var.resources.cpu
-  memory                      = var.resources.memory
-  container_definitions       = jsonencode([local.container_definition])
+  cpu                       = var.resources.cpu
+  memory                    = var.resources.memory
+  container_definitions     = jsonencode([local.container_definition])
 
   tags = local.tags
 }
 
 resource "aws_ecs_service" "main" {
-  name                              = local.prefix
-  cluster                           = aws_ecs_cluster.main.id
-  task_definition                   = aws_ecs_task_definition.main.arn
-  desired_count                     = var.resources.instances
-  enable_execute_command            = true
+  name            = local.prefix
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.main.arn
+  desired_count   = var.resources.instances
+  enable_execute_command = true
   health_check_grace_period_seconds = var.health_check_grace_period_seconds
-  launch_type                       = "FARGATE"
+  launch_type     = "FARGATE"
   network_configuration {
     security_groups = concat([aws_security_group.ecs.id], var.extra_security_group_ids)
     subnets         = var.vpc.private_subnet_ids
   }
   load_balancer {
-    container_name   = local.container_name
+    container_name  = local.container_name
     target_group_arn = aws_lb_target_group.main.arn
-    container_port   = var.container_port
+    container_port  = var.container_port
   }
 
   dynamic "deployment_circuit_breaker" {
     for_each = var.deployment_circuit_breaker != null ? [1] : []
     content {
-      enable   = var.deployment_circuit_breaker.enable
+      enable  = var.deployment_circuit_breaker.enable
       rollback = var.deployment_circuit_breaker.rollback
     }
   }
@@ -136,3 +136,7 @@ resource "aws_ecs_service" "main" {
 
   tags = local.tags
 }
+
+
+# terraform.tfvars (No changes needed)
+# Root main.tf (No changes needed)
