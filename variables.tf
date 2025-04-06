@@ -378,35 +378,32 @@ variable "backend_seed_fail_on_error" {
   default     = true
 }
 
-variable "admin_credentials" {
+variable "backend_admin_credentials" {
   description = "Admin user credentials. If provided, it will be used to create an admin user."
-
   type = object({
     email             = string
     password          = string
     generate_password = bool
   })
-
   default = {
     email             = ""
     password          = ""
     generate_password = true
   }
-
   sensitive = true
 
   validation {
     condition = (
-      var.admin_credentials != null ? var.admin_credentials.email != "" : true
+      var.backend_admin_credentials != null ? var.backend_admin_credentials.email != "" : true
     )
     error_message = "Admin email is required when admin credentials are provided."
   }
 
   validation {
     condition = (
-      var.admin_credentials != null ? var.admin_credentials.generate_password == true : true
+      var.backend_admin_credentials != null ? var.backend_admin_credentials.generate_password == true : true
     ) || (
-      var.admin_credentials != null ? var.admin_credentials.password != "" : true
+      var.backend_admin_credentials != null ? var.backend_admin_credentials.password != "" : true
     )
     error_message = "Admin password is required when admin credentials are provided and generate_password is false."
   }
@@ -565,9 +562,4 @@ variable "storefront_extra_secrets" {
   }))
 
   default = {}
-}
-variable "backend_hostname" {
-  description = "The hostname used for the backend service (e.g., api.example.com)"
-  type        = string
-  default     = ""
-}
+
