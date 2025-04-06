@@ -378,7 +378,7 @@ variable "backend_seed_fail_on_error" {
   default     = true
 }
 
-variable "backend_admin_credentials" {
+variable "admin_credentials" {
   description = "Admin user credentials. If provided, it will be used to create an admin user."
   type = object({
     email             = string
@@ -394,16 +394,16 @@ variable "backend_admin_credentials" {
 
   validation {
     condition = (
-      var.backend_admin_credentials != null ? var.backend_admin_credentials.email != "" : true
+      var.admin_credentials != null ? var.admin_credentials.email != "" : true
     )
     error_message = "Admin email is required when admin credentials are provided."
   }
 
   validation {
     condition = (
-      var.backend_admin_credentials != null ? var.backend_admin_credentials.generate_password == true : true
+      var.admin_credentials != null ? var.admin_credentials.generate_password == true : true
     ) || (
-      var.backend_admin_credentials != null ? var.backend_admin_credentials.password != "" : true
+      var.admin_credentials != null ? var.admin_credentials.password != "" : true
     )
     error_message = "Admin password is required when admin credentials are provided and generate_password is false."
   }
